@@ -1,9 +1,9 @@
 # 
-# Cookbook Name:: encryptfs
-# Attributes:: default
+# Cookbook Name:: encrypted_blockdevice
+# Resource:: default
 #
-# Copyright 2013, Neil Schelly
-# Copyright 2013, Dyn, Inc.    
+# Copyright 2013, Alex Trull
+# Copyright 2013, Medidata Worldwide    
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,10 +21,28 @@
 actions :create, :delete
 default_action :create
 
+# This is the eventual name of the block device under /dev/mapper/
 attribute :name, :kind_of => String, :name_attribute => true
+
+# Our two types of backing storage.
+attribute :device, :kind_of => String
+attribute :file, :kind_of => String
+
+# Cipher and Hash - sensible defaults.
+attribute :cipher, :kind_of => String, :default => "aes-cbc-essiv:sha256"
+
+# Attributes to support the file backed storage. False sparse means slower file creation/time to converge.
 attribute :size, :kind_of => Fixnum, :default => 100
-attribute :filepath, :kind_of => String, :required => true
-attribute :mountpath, :kind_of => String, :required => true
-attribute :fstype, :kind_of => String, :default => 'ext4'
+attribute :sparse, :kind_of => [ TrueClass, FalseClass ], :default => true
+
+# Keystore must be specified, keyfile is optional, only meaningful for 'local' keystore.
+attribute :keystore, :kind_of => String, :required => true
+# Keyfile is used to indicate where the key is kept if the keystore is 'local'
+attribute :keyfile, :kind_of => String
+# Keylength is only used in local, databag and encrypted_databag keystores.
+attribute :keylength, :kind_of => Fixnum, :default => 1024
+
+# Additional arguments, empty by default, might be needed for edgecases just like yours.
+attribute :cryptsetup_args, :kind_of => String, :default => ""
 
 attr_accessor :exists

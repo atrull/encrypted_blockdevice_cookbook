@@ -1,9 +1,9 @@
 # 
-# Cookbook Name:: encryptfs
+# Cookbook Name:: encrypted_blockdevice
 # Attributes:: default
 #
-# Copyright 2013, Neil Schelly
-# Copyright 2013, Dyn, Inc.    
+# Copyright 2013, Alex Trull
+# Copyright 2013, Medidata Worldwide    
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +18,18 @@
 # limitations under the License.
 #
 
-# If the last encryptfs is removed, setting this true will uninstall cryptsetup
-default[:encryptfs][:uninstall_cryptsetup_iflast] = false
+# This is used to create the encrypted block devices themselves, see examples in the README.
+default[:encrypted_blockdevices] = Hash.new
 
+# the [:encrypted_blockdevice] key is used for settings.
+
+# Does this even matter ? 
+# If the last encrypted_blockdevice is removed, setting this true will uninstall cryptsetup
+default[:encrypted_blockdevice][:uninstall_cryptsetup_iflast] = false
+
+# Is this even necessary ? Whatever happened to paths in the environment "lol" ?
 # Path to the cryptdisks_start and cryptdisks_stop files
-default[:encryptfs][:cryptdisks_path] = "/sbin" unless node.platform?("ubuntu")
-default[:encryptfs][:cryptdisks_path] = "/usr/sbin" if node.platform?("ubuntu")
-default[:encryptfs][:cryptdisks_start] = "#{node[:encryptfs][:cryptdisks_path]}/cryptdisks_start"
-default[:encryptfs][:cryptdisks_stop] = "#{node[:encryptfs][:cryptdisks_path]}/cryptdisks_stop"
+default[:encrypted_blockdevice][:cryptdisks_path] = "/sbin" unless node.platform?("ubuntu")
+default[:encrypted_blockdevice][:cryptdisks_path] = "/usr/sbin" if node.platform?("ubuntu")
+default[:encrypted_blockdevice][:cryptdisks_start] = "#{node[:encrypted_blockdevice][:cryptdisks_path]}/cryptdisks_start"
+default[:encrypted_blockdevice][:cryptdisks_stop] = "#{node[:encrypted_blockdevice][:cryptdisks_path]}/cryptdisks_stop"

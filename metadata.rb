@@ -1,9 +1,8 @@
 # 
-# Cookbook Name:: encryptfs
-# Attributes:: default
+# Cookbook Name:: encrypted_blockdevice
 #
-# Copyright 2013, Neil Schelly
-# Copyright 2013, Dyn, Inc.    
+# Copyright 2013, Alex Trull
+# Copyright 2013, Medidata Worldwide    
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,12 +17,12 @@
 # limitations under the License.
 #
 
-name             'encryptfs'
-maintainer       'Dyn, Inc'
-maintainer_email 'nschelly@dyn.com'
+name             'encrypted_blockdevice'
+maintainer       'Medidata Worldwide'
+maintainer_email 'cookbooks@mdsol.com'
 license          'Apache v2.0'
-description      'LWRP to manage encrypted one-boot-use filesystems for sensitive information on untrusted hardware or cloud appliances.'
+description      'A cookbook and LWRPs to manage block device encryption, offering many options for different scenarios.'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '1.0.1'
+version          '0.0.1'
 supports         'ubuntu', '>= 8.04'
 supports         'debian', '>= 6.0'

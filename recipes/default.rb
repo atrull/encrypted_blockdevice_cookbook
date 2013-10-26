@@ -1,9 +1,9 @@
 # 
-# Cookbook Name:: encryptfs
-# Attributes:: default
+# Cookbook Name:: encrypted_blockdevice
+# Recipe:: default
 #
-# Copyright 2013, Neil Schelly
-# Copyright 2013, Dyn, Inc.    
+# Copyright 2013, Alex Trull
+# Copyright 2013, Medidata Worldwide    
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,3 +17,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Install cryptsetup
+package "cryptsetup" do
+  action [ :install, :upgrade ]
+end
+
+# Ensure service is enabled and started.
+service "cryptdisks" do
+  action [ :enable, :start ]
+end
+
+# If we have contents at the default location, we try to make the encrypted_blockdevice with the LWRP.
+encrypted_blockdevice_create_all_from_key "encrypted_blockdevices" do
+  action :create
+  not_if ( node[:encrypted_blockdevices] == nil || node[:encrypted_blockdevices].empty? )
+end

@@ -1,0 +1,36 @@
+{
+  "encrypted_blockdevices": {
+    "raidcrypt": {
+      "device": "/dev/md0",
+      "keystore": "encrypted_databag"
+    },
+    "sparse": {
+      "file": "/mnt/sparse.file",
+      "keystore": "local",
+      "keyfile": "/etc/secrets/sparse.key",
+      "size": 10000
+    },
+    "notsparse": {
+      "file": "/mnt/notsparse.file",
+      "sparse": false,
+      "keystore": "discard",
+      "size": 1000
+    }
+  },
+  "filesystems": {
+    "raidcrypt": {
+      "device": "/dev/mapper/raidcrypt",
+      "fstype": "xfs",
+      "mount": "/mnt"
+    },
+    "sparse": {
+      "fstype": "ext4",
+      "mount": "/mnt/sparse"
+    },
+    "notsparse": {
+      "device": "/dev/mapper/notsparse",
+      "fstype": "ext3",
+      "mount": "/mnt/notsparse"
+    }
+  }
+}

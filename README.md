@@ -29,13 +29,13 @@ already present.
 
 Attributes
 ==========
-* `node['encryptfs'['uninstall_cryptsetup_iflast']` - Sets the cookbook to
+* `node['encrypted_blockdevice'['uninstall_cryptsetup_iflast']` - Sets the cookbook to
   remove the `cryptsetup` packages after the last filesystem is removed from
   `/etc/crypttab`.  Default is `false`, to leave the packages installed. Only
   the `cryptsetup` and `cryptsetup-bin` packages will be uninstalled if this is
   `true`.
-* `node['encryptfs']['cryptdisks_path']` `node['encryptfs']['cryptdisks_stop']`
-  `node['encryptfs']['cryptdisks_start']` - All used to set paths for the
+* `node['encrypted_blockdevice']['cryptdisks_path']` `node['encrypted_blockdevice']['cryptdisks_stop']`
+  `node['encrypted_blockdevice']['cryptdisks_start']` - All used to set paths for the
   scripts that are part of the cryptsetup package.  They are in a different
   place in Ubuntu.
 
@@ -50,19 +50,19 @@ really should be using this cookbook only as an LWRP.
 
 Resource/Provider
 =================
-This cookbook includes an LWRP, `encryptfs`, for managing one-time-use
+This cookbook includes an LWRP, `encrypted_blockdevice`, for managing one-time-use
 encrypted filesystems.
 
-    encryptfs "data" do
+    encrypted_blockdevice "data" do
       size 100
-      filepath "/cryptfs"
-      mountpath "/usr/local/cryptdata"
+      file "/cryptfs"
+      mount "/usr/local/cryptdata"
       action :create
     end
 
-The `size` is specified in megabytes.  The `filepath` is where the file of
+The `size` is specified in megabytes.  The `file` is where the file of
 that size is to be created in your existing filesystems.  That file will
-become a loop device containing the encrypted block data.  The `mountpath` will
+become a loop device containing the encrypted block data.  The `mount` will
 be where the encrypted filesystem is to be mounted.  The LWRP supports both
 `:create` and `:delete` actions.
 
@@ -70,29 +70,29 @@ Usage
 =====
 Put the following in your cookbook's metadata.rb file to include this LWRP:
 
-    depends "encryptfs"
+    depends "encrypted_blockdevice"
 
 The following added to your recipes will create an encrypted filesystem:
 
-    encryptfs "data" do
+    encrypted_blockdevice "data" do
       size 100
-      filepath "/cryptfs"
-      mountpath "/usr/local/cryptdata"
+      file "/cryptfs"
+      mount "/usr/local/cryptdata"
       fstype "ext4"
       action :create
     end
 
 The following added to your recipe will delete an encrypted filesystem:
 
-    encryptfs "data" do
+    encrypted_blockdevice "data" do
       action :delete
     end
 
 License and Authors
 -------------------
-Author: Neil Schelly (@neilschelly)
+Author: Alex Trull
 
-Copyright 2013, Dyn, Inc (@DynInc)
+Copyright 2013, Medidata Worldwide
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

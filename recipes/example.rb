@@ -1,9 +1,9 @@
 # 
-# Cookbook Name:: encryptfs
-# Attributes:: default
+# Cookbook Name:: encrypted_blockdevice
+# Recipe:: example
 #
-# Copyright 2013, Neil Schelly
-# Copyright 2013, Dyn, Inc.    
+# Copyright 2013, Alex Trull
+# Copyright 2013, Medidata Worldwide    
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,26 +18,78 @@
 # limitations under the License.
 #
 
-encryptfs "data" do
-  size 100
-  filepath "/cryptfs"
-  mountpath "/usr/local/cryptdata"
-  fstype "ext4"
-  action :create
+# Install cryptsetup
+package "cryptsetup" do
+  action [ :install, :upgrade ]
 end
 
-encryptfs "data2" do
-  size 100
-  filepath "/cryptfs2"
-  mountpath "/usr/local/cryptdata2"
-  fstype "ext4"
-  action :create
+# Ensure service is enabled and started.
+service "cryptdisks" do
+  action [ :enable, :start ]
 end
 
-encryptfs "data3" do
-  size 100
-  filepath "/cryptfs3"
-  mountpath "/usr/local/cryptdata3"
-  fstype "ext4"
+# If we have contents at the default location, we try to make the encrypted_blockdevice with the LWRP.
+encrypted_blockdevice_create_all_from_key "encrypted_blockdevices" do
   action :create
+  not_if ( node[:encrypted_blockdevices] == nil || node[:encrypted_blockdevices].empty? )
 end
+
+# Maybe we want to use a different location key for the encrypted block devices ?
+
+encrypted_blockdevice_create_all_from_key "my_little_encrypted_blockdevices" do
+  action :create
+  not_if ( node[:my_little_encrypted_blockdevices] == nil || node[:my_little_encrypted_blockdevices].empty? )
+end
+
+# Some examples using the encrypted_blockdevice provider directly:
+
+# We don't make filesystems with the LWRPs in this cookbook, so we import the filesystem cookbook and use its default provider to do that for these examples.
+include_recipe "filesystem"
+
+# A simple local file - we will lose the key after a reboot, so you had better have redundant copies of the data elsewhere, like backups or other cluster members..
+# But at least we know that the data will never survive machine termination/decomissioning.
+encrypted_blockdevice "datacrypt" do
+  size 512
+  keystore discard
+  file "/datacrypt.file"
+end
+
+# And a filesystem to go on top.
+filesystem "datacrypt" do
+  fstype ext4 
+  mount "/datacrypt"
+end
+
+# A device gets encrypted, using a key stored local to the machine, not that secure, but whatever floats your boat. Maybe your local disk or secrets folder is on a disk you know is watched over by an armed guard, with another armed guard to watch that armed guard ?
+# Keys kept next to secrets means secrets are lost with ease. 
+encrypted_blockdevice "data2" do
+  device "/dev/xvdd"
+  keystore local
+  keyfile "/etc/secrets/data2.key"
+  keylength 2048
+end
+
+# And again a filesystem to sit on it.
+filesystem "data2" do
+  fstype ext3
+  mount "/data2"
+end
+
+# A local raid device gets labelled "data3" - we store the key in a databag in the chef API. Maybe you trust the chef API to be your keystore ? Maybe. The device is only good if the key is recoverable, so deleting the key from the keystore denies attackers if they haven't comprimised the running machine.
+encrypted_blockdevice "data3" do
+  device "/dev/md0"
+  keystore encrypted_databag
+  keylength 4096
+end
+
+# If you use EC2 with Chef, I recommend checking that your encrypted databag key isn't sneaking back into the the chef API via Ohai's (excellent, if overzealous? I mean who needs the userdata? really, come on.) ec2 cloud plugin pulling the bootstrap userdata where some people happen to put the key.
+# Why ? Keys shouldn't kept next to the secrets they protect.
+
+# And derp, a filesystem go on it.
+filesystem "data3" do
+  # this device line is redundant, but kept for style.
+  device "dev/mapper/data3"
+  fstype xfs
+  mount "/data3"
+end
+
