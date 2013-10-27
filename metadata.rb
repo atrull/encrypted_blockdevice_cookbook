@@ -24,5 +24,13 @@ license          'Apache v2.0'
 description      'A cookbook and LWRPs to manage block device encryption, offering many options for different scenarios.'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.0.1'
-supports         'ubuntu', '>= 8.04'
-supports         'debian', '>= 6.0'
+
+%w/redhat centos xenserver ubuntu debian scientific amazon/.each do |os|
+  supports os
+end
+
+attribute'node[:encrypted_blockdevices]',
+  :description => "Encrypted block devices to be created",
+  :type => "hash",
+  :required => "recommended"
+

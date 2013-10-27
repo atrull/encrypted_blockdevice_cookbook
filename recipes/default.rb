@@ -19,12 +19,12 @@
 #
 
 # Install cryptsetup
-package "cryptsetup" do
+package "#{node[:encrypted_blockdevice][:cryptsetup_package]}" do
   action [ :install, :upgrade ]
 end
 
 # Ensure service is enabled and started.
-service "cryptdisks" do
+service "#{node[:encrypted_blockdevice][:cryptdisks_service]}" do
   action [ :enable, :start ]
 end
 
@@ -33,3 +33,4 @@ encrypted_blockdevice_create_all_from_key "encrypted_blockdevices" do
   action :create
   not_if ( node[:encrypted_blockdevices] == nil || node[:encrypted_blockdevices].empty? )
 end
+

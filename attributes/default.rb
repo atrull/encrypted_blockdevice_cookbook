@@ -18,18 +18,12 @@
 # limitations under the License.
 #
 
-# This is used to create the encrypted block devices themselves, see examples in the README.
+# The [:encrypted_blockdevices] key is used to create the encrypted block devices themselves from attributes, see examples in the README. We recalculate the hash each run.
 default[:encrypted_blockdevices] = Hash.new
 
-# the [:encrypted_blockdevice] key is used for settings.
+# The [:encrypted_blockdevice] key is used for settings - don't confuse this with the one above.
+#
 
-# Does this even matter ? 
-# If the last encrypted_blockdevice is removed, setting this true will uninstall cryptsetup
-default[:encrypted_blockdevice][:uninstall_cryptsetup_iflast] = false
-
-# Is this even necessary ? Whatever happened to paths in the environment "lol" ?
-# Path to the cryptdisks_start and cryptdisks_stop files
-default[:encrypted_blockdevice][:cryptdisks_path] = "/sbin" unless node.platform?("ubuntu")
-default[:encrypted_blockdevice][:cryptdisks_path] = "/usr/sbin" if node.platform?("ubuntu")
-default[:encrypted_blockdevice][:cryptdisks_start] = "#{node[:encrypted_blockdevice][:cryptdisks_path]}/cryptdisks_start"
-default[:encrypted_blockdevice][:cryptdisks_stop] = "#{node[:encrypted_blockdevice][:cryptdisks_path]}/cryptdisks_stop"
+# The following attributes are good for debian and ubuntu.
+default[:encrypted_blockdevice][:cryptsetup_package] = "cryptsetup"
+default[:encrypted_blockdevice][:cryptdisks_service] = "cryptdisks"
