@@ -31,7 +31,8 @@
         },
         "plainbag": {
             "fstype": "ext2",
-            "mount": "/test/plainbag"
+            "mount": "/test/plainbag",
+            "noenable": true
         },
         "local": {
             "fstype": "xfs",
