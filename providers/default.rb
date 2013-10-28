@@ -256,6 +256,7 @@ def create_keyfile(keyfile, keylength)
   # We make sure a directory exists for the file to live in.
   directory ::File.dirname(keyfile) do
     recursive true
+    mode "00700"
   end
 
   # Create file with the chef provider
