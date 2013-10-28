@@ -79,7 +79,7 @@ def create_encrypted_blockdevice
     # create uses the name then device order
     device_name_order = "#{name} #{device}"
   else
-    # if we're not create (open, for instance) then need the reverse order.
+    # if we're not "create" (open, for instance) then we need the reverse order.
     device_name_order = "#{device} #{name}"
   end
 
@@ -90,7 +90,13 @@ def create_encrypted_blockdevice
     keyfile = "/dev/urandom"
     
     # We call the cryptsetup command directly.
-    create_device=`cryptsetup #{cryptsetup_args} #{device_name_order} --cipher #{cipher} --batch-mode --key-file=#{keyfile}` 
+    `cryptsetup #{cryptsetup_args} #{device_name_order} --cipher #{cipher} --batch-mode --key-file=#{keyfile}` 
+
+    if $?.exitstatus.to_i == "0"
+      # This is good exit status.
+      puts "Created #{name} and discarded the key"
+      puts `cryptsetup status #{name}`
+    end
  
   elsif ( @new_resource.keystore == "local" )
 
@@ -99,8 +105,8 @@ def create_encrypted_blockdevice
     # This is the only keystore supported at boot time, with or without network connectivity.
 
     # Local means we create the keyfile idempotently - it may already exist.
-    create_keyfile(keyfile, @new_resource.keylength)
     keyfile = @new_resource.keyfile
+    create_keyfile(keyfile, @new_resource.keylength)
 
     # verify that crypttab is present and secured (not everyone-readable, either)
     file "/etc/crypttab" do
@@ -133,86 +139,97 @@ def create_encrypted_blockdevice
     
     # We will be using the cryptsetup command instead of the crypttab.
  
-    # The item's name is deterministicaly for each host this cookbook provider is run on: nodename.blocklabel
+    # The item's name is deterministicaly for each host this cookbook provider is run on: nodename.blocklabel and periods and slashes cleaned up.
     keystore_item_name = "#{node.name}-#{new_resource.name}".gsub(/\./, "-").gsub(/\//, "-")
 
-    puts "Searching for keystore item #{keystore_item_name}"
+    # Our keystore databag name comes from attributes.
+    keystore_databag_name = node[:encrypted_blockdevice][:keystore_databag_name]
+
+    puts "Searching for keystore item #{keystore_item_name} in data bag #{keystore_databag_name}"
     # We search for the items we expect in the bag we configured - just referencing them can cause a failure - 404 not found etc.
-    keystore_item_result = search(:encrypted_blockdevice_keystore, "id:#{keystore_item_name}" ) 
+    keystore_item_result = search(:"#{keystore_databag_name}", "id:#{keystore_item_name}" )
 
     # We pull the secret from the file's default location. If someone can prove a better way to get this config bit, maybe from Chef::Config, please submit a PR/patch/code snippet !
-    if ::File.exists?("/etc/chef/encrypted_data_bag_secret")
-      puts "We found a secret at /etc/chef/encrypted_data_bag_secret"
-      encrypted_data_bag_secret = `cat /etc/chef/encrypted_data_bag_secret`.strip
+    if ::File.exists?(node[:encrypted_blockdevice][:encrypted_data_bag_secret])
+      puts "We found a secret at #{node[:encrypted_blockdevice][:encrypted_data_bag_secret]}"
+      encrypted_data_bag_secret = `cat #{node[:encrypted_blockdevice][:encrypted_data_bag_secret]}`.strip
     else
-      puts "No key found at /etc/chef/encrypted_data_bag_secret"
+      puts "No key found at #{node[:encrypted_blockdevice][:encrypted_data_bag_secret]}"
     end
 
     # If we can't find the item for the device we're creating, the results should be empty or nil.
     if ( keystore_item_result == nil || keystore_item_result.empty? )
 
-      puts "Creating #{keystore_item_name}"
-
-      # This is probably the first run of this cookbook on this node
-      # So we set about creating a key, creating a key and settings, opening the device and then saving the details to the keystore. 
+      # This is probably the first run of this cookbook on this node with this configured device.
+      # So we set about creating a key, opening the device with the details we have and then saving the details to the keystore. 
       
-      # We generate a new key.
+      # This is a new device - i.e. one for which we cannot find existing data, so we generate a new key.
       key = `openssl rand -hex #{@new_resource.keylength} | tr -d '\r\n'`
-      
-      # We determine our 'keyfilesize' is based on 'keylength' in bytes doubled because the key is kept hex-encoded.
+     
+      puts "Generating #{@new_resource.keylength} byte key for #{name}"
+ 
+      # We determine our 'keyfilesize' for --keyfile-size based on the 'keylength' in bytes doubled because the key is hex-encoded.
       keyfilesize = (new_resource.keylength * 2)
 
       # We pass the key without a newline to the cryptsetup command with the necessary arguments.
       # We should find a way to pipe this in without it showing it in ps auxww or any logs.
 
-      # DEBUG puts "command: echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-"
-      create_device=`echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-`
+      `echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-`
 
-      # Then flesh out the databag of the used settings and key for the keystore - rather useful after a reboot.
-      new_deviceitem = {
-        "id" => keystore_item_name,
-        "name" => name,
-        "device" => device,
-        "cryptsetup_args" => cryptsetup_args,
-        "keyfilesize" => keyfilesize,
-        "cipher" => cipher,
-        "key" => key
-      }
+      if $?.exitstatus.to_i == "0"
+        # This is good exit status.
+        puts `cryptsetup status #{name}`
+        
+        # We probably created the device, so we go on to create the bag item.
+        puts "Creating new device item for #{name}" 
 
-      puts "Saving #{keystore_item_name}"
-      # Since we have two modes of databag storage, we have a minor divergence in behaviour - both save the settings/key to the keystore. 
-      if @new_resource.keystore == "encrypted_databag"
-        # Encrypted databag item.
-        # The EncryptedDataBagItem object does not allow direct .save functionality because Opscode seem to think encrypted things ought to be readonly by machines.
-        # So this is a workaround based upon their own test spec that demonstrates this behaviour.
-        # See Chef repo: spec/unit/knife/data_bag_create_spec.rb
-        # Go complain at https://tickets.opscode.com/browse/CHEF-2401
-        encrypted_new_deviceitem = Chef::EncryptedDataBagItem.encrypt_data_bag_item(new_deviceitem, encrypted_data_bag_secret)
-        deviceitem = Chef::DataBagItem.from_hash(encrypted_new_deviceitem)
-        deviceitem.data_bag("encrypted_blockdevice_keystore")
-        deviceitem.save 
-      elsif @new_resource.keystore == "databag"
-        # Unencrypted databag item.
-        deviceitem = Chef::DataBagItem.new
-        deviceitem.raw_data = new_deviceitem
-        deviceitem.data_bag("encrypted_blockdevice_keystore")
+        # We flesh out the databag of the used settings and key for the keystore - rather useful after a reboot.
+        new_deviceitem = {
+          "id" => keystore_item_name,
+          "name" => name,
+          "device" => device,
+          "cryptsetup_args" => cryptsetup_args,
+          "keyfilesize" => keyfilesize,
+          "cipher" => cipher,
+          "key" => key
+        }
+
+        # Since we have two modes of databag storage, we have a minor divergence in behaviour - both save the settings/key to the keystore. 
+        if @new_resource.keystore == "encrypted_databag"
+          # Encrypted databag item.
+          # The EncryptedDataBagItem object does not allow direct .save functionality because Opscode seem to think encrypted things ought to be readonly by machines.
+          # So this is a workaround based upon their own test spec that demonstrates this behaviour.
+          # See Chef repo: spec/unit/knife/data_bag_create_spec.rb
+          # Go complain at https://tickets.opscode.com/browse/CHEF-2401
+          puts "Encrypting device item for #{name}"
+          encrypted_new_deviceitem = Chef::EncryptedDataBagItem.encrypt_data_bag_item(new_deviceitem, encrypted_data_bag_secret)
+          deviceitem = Chef::DataBagItem.from_hash(encrypted_new_deviceitem)
+        elsif @new_resource.keystore == "databag"
+          # Unencrypted databag item.
+          deviceitem = Chef::DataBagItem.new
+          deviceitem.raw_data = new_deviceitem
+        end 
+        deviceitem.data_bag(keystore_databag_name)
         deviceitem.save
-      end 
-       
+        puts "Saved #{keystore_item_name} to keystore #{keystore_databag_name}"
+
+      end
+ 
     else
 
       # Otherwise there is an item already, but no mapped device yet. We assume settings are correct for the device we have, so we use the old settings/key from the keystore to open the device.
       # We would expect to be here after a reboot.
 
-      puts "Getting keystore info for #{keystore_item_name}"
+      puts "Getting data from #{keystore_databag_name} for #{keystore_item_name}"
       # We get our key from the bag
       if @new_resource.keystore == "encrypted_databag"
-        existing_deviceitem = Chef::EncryptedDataBagItem.load("encrypted_blockdevice_keystore", keystore_item_name, encrypted_data_bag_secret)
+        existing_deviceitem = Chef::EncryptedDataBagItem.load(keystore_databag_name, keystore_item_name, encrypted_data_bag_secret)
+        puts "Decrypted device item for #{name}"
       elsif @new_resource.keystore == "databag"
-        existing_deviceitem = data_bag_item "encrypted_blockdevice_keystore", keystore_item_name
+        existing_deviceitem = data_bag_item keystore_databag_name, keystore_item_name
       end
 
-      # We map to shorter attributes
+      # We map to short attributes from the item.
       name = existing_deviceitem["name"]
       device = existing_deviceitem["device"]
       cryptsetup_args = existing_deviceitem["cryptsetup_args"]
@@ -223,9 +240,13 @@ def create_encrypted_blockdevice
       # We pass the key without a newline to the cryptsetup command with the necessary arguments.
       # We should find a way to pipe this in without it showing it in ps auxww or any logs.
 
-      puts "Loading #{keystore_item_name}"
-      # DEBUG puts "command: echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-"
-      create_device=`echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-`      
+      `echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-`
+
+      if $?.exitstatus.to_i == "0"
+        # This is good exit status.
+        puts "Opened #{name}"
+        puts `cryptsetup status #{name}`
+      end
 
     end
      
@@ -242,6 +263,8 @@ def encrypted_blockdevice_crypttab_add(name, device, keyfile, cipher)
 end
 
 def create_keyfile(keyfile, keylength)
+  puts "Creating #{keyfile}"
+
   # We make sure a directory exists for the file to live in.
   directory ::File.dirname(keyfile) do
     recursive true
@@ -253,14 +276,12 @@ def create_keyfile(keyfile, keylength)
     group "root"
     mode "00600"
     action :create_if_missing
-    only_if "which openssl"
     notifies :run, "execute[create-keyfile-contents]", :immediately
   end
 
   # Create the key's contents with openssl - we use hex encoding and remove the garbage formatting.
   execute "create-keyfile-contents" do
     command "openssl rand -hex #{keylength} | tr -d '\r\n' > #{keyfile}"
-    only_if "which openssl"
     action :nothing
   end
 end

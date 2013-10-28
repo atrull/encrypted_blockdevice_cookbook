@@ -22,8 +22,13 @@
 default[:encrypted_blockdevices] = Hash.new
 
 # The [:encrypted_blockdevice] key is used for settings - don't confuse this with the one above.
-#
 
-# The following attributes are good for debian and ubuntu.
+# The default keystore's name
+default[:encrypted_blockdevice][:keystore_databag_name] = "encrypted_blockdevice_keystore"
+
+# This should be defaulting to the Chef::Config attribute, which I can't seem to get working.
+default[:encrypted_blockdevice][:encrypted_data_bag_secret] ="/etc/chef/encrypted_data_bag_secret"
+
+# The following attributes are good for debian and ubuntu - they are provided for extension to other distros.
 default[:encrypted_blockdevice][:cryptsetup_package] = "cryptsetup"
 default[:encrypted_blockdevice][:cryptdisks_service] = "cryptdisks"

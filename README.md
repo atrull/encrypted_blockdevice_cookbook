@@ -13,23 +13,26 @@ When this cookbook is run by a recipe, the default behaviour is to attempt to cr
 
 There are four kinds of `keystore` available, giving differing levels of security and bootability:
 
-*`discard` Provides a one-time use block device with a randomly-generated key kept in RAM. Data will not be recoverable after boot from the media.
-*`encrypted_databag` Stores the key for the block device in an encrypted databag on the chef server.
-*`databag` Stores the key for the block device in a normal databag on the chef server.
-*`local` Stores a local (on the filesystem - such as /etc/secrets/device.key) randomly-generated key file.
+* `discard` Provides a one-time use block device with a randomly-generated key kept in RAM. Data will not be recoverable after boot from the media.
+
+* `encrypted_databag` Stores the key for the block device in an encrypted databag on the chef server.
+
+* `databag` Stores the key for the block device in a normal databag on the chef server.
+
+* `local` Stores a local (on the filesystem - such as /etc/secrets/device.key) randomly-generated key file.
 
 These modes are ordered from most secure (and hard to recover) to least secure (and easily recoverable).
 
 Keystore Caveats
 ================
 
-In `discard` mode you must be absolutely sure you can lose the local copy of the data - backups are absolutely critical in this mode.
+* In `discard` mode you must be absolutely sure you can lose the local copy of the data - backups are absolutely critical in this mode.
 
-In `encrypted_databag` and `databag` mode we will use the Chef API as a keystore - this means the data should be recoverable once chef has run after a reboot, unless the key is delete from the chef server.
+* In `encrypted_databag` and `databag` mode we will use the Chef API as a keystore - this means the data should be recoverable once chef has run after a reboot, unless the key is delete from the chef server.
 
-You should create the "encrypted_blockdevice_keystore" databag so that items can be put into it by this cookbook. This databag's name is currently hard coded, but the items are named according to a pattern based upon the node name and device. Your node names must always be uniquely generated to avoid collisions/key sharing !
+You should create the "encrypted_blockdevice_keystore" databag so that items can be put into it by this cookbook. This databag's name is set in the cookbook attributes and can be changed, but the items are named according to a pattern based upon the node name and device. Your node names must always be uniquely generated to avoid collisions/key sharing !
 
-In `local` mode, the key is kept in a file on the local filesystem, if the key is available after reboot, the data should be recoverable without intervention before chef runs.
+* In `local` mode, the key is kept in a file on the local filesystem, if the key is available after reboot, the data should be recoverable without intervention before chef runs.
 
 Conventional wisdom and Cryptographic common sense is that you should not keep the keys for secrets next to the secrets they protect, consequently a `local` keystore with `keyfile` is not recommended when your secrets are dangerous if compromised.
 
