@@ -3,7 +3,12 @@
         "raidcrypt": {
             "device": "/dev/md0",
             "keystore": "encrypted_databag",
-            "keylength": 256
+            "keylength": 1024
+        },
+        "plainbag": {
+            "file": "/test/plainbag.file",
+            "keystore": "databag",
+            "size": 100
         },
         "local": {
              "file": "/test/local.file",
@@ -12,8 +17,8 @@
             "sparse": false,
             "size": 1000
         },
-        "sparse": {
-            "file": "/test/sparse.file",
+        "discard": {
+            "file": "/test/discard.file",
             "keystore": "discard",
             "size": 1000
         }
@@ -24,13 +29,17 @@
             "mount": "/mnt",
             "noenable": true
         },
+        "plainbag": {
+            "fstype": "ext2",
+            "mount": "/test/plainbag"
+        },
         "local": {
             "fstype": "xfs",
             "mount": "/test/local"
         },
-        "sparse": {
-            "fstype": "ext4",
-            "mount": "/test/sparse",
+        "discard": {
+            "fstype": "ext3",
+            "mount": "/test/discard",
             "noenable": true
         }
     }
