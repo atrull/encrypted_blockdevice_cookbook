@@ -9,17 +9,17 @@ There are two types of storage possible: device storage and file storage.
 
 Both types of storage get mapped back to the name of the encrypted block device given.
 
-When this cookbook is run by a recipe, the default behaviour is to attempt to create the encrypted block devices from the encrypted_blockdevices key/attributes. See examples of how to use this key, and a few options on the attributes.
+When this cookbook is run by a recipe, the default behaviour is to attempt to create the encrypted block devices from the encrypted_blockdevices key/attributes. See the Usage section and example recipe for how to use this key, and a few options on the attributes.
 
 There are four kinds of `keystore` available, giving differing levels of security and bootability:
 
-* `discard` Provides a one-time use block device with a randomly-generated key kept in RAM. Data will not be recoverable after boot from the media.
+* `discard` Provides a one-time use block device with a randomly-generated key kept in RAM. Data will not be recoverable after reboot or cryptdisks shutdown/restart.
 
-* `encrypted_databag` Stores the key for the block device in an encrypted databag on the chef server.
+* `encrypted_databag` Stores the key for the block device in an encrypted databag on the chef server. When the cookbook/chef runs after reboot, the block device will be decrypted and mounted.
 
-* `databag` Stores the key for the block device in a normal databag on the chef server.
+* `databag` Stores the key for the block device in a normal databag on the chef server. When the cookbook/chef runs after reboot, the block device will be decrypted and mounted.
 
-* `local` Stores a local (on the filesystem - such as /etc/secrets/device.key) randomly-generated key file.
+* `local` Stores a local (on the filesystem - such as /etc/secrets/device.key) randomly-generated key file. This will be mounted by the system using the crypttab on reboot.
 
 These modes are ordered from most secure (and hard to recover) to least secure (and easily recoverable).
 
@@ -39,7 +39,7 @@ Conventional wisdom and Cryptographic common sense is that you should not keep t
 Other Caveats
 =============
 
-The author if this cookbook believes cookbooks should not overlap in behaviour or ability. Each cookbook should do one thing and do it well..
+The author of this cookbook believes cookbooks should not overlap in behaviour or ability. Each cookbook should do one thing and do it well.
 
 Consequently this cookbook explicitely does not create filesystems themselves - all it does is encrypt underlying blocks and present them at an unencrypted location for use - you should use the filesystem cookbook to make use of the unencrypted location.
 
