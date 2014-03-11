@@ -213,11 +213,8 @@ http://code.google.com/p/cryptsetup/
 
 License and Authors
 ===================
-Author: Alex Trull
-Copyright 2013, Medidata Worldwide
-
-Based upon the excellent cookbook by Neil Schelly (@neilschelly) of Dyn (@DynInc)
-See https://github.com/dyninc/cookbook-encryptfs/
+Author: Neil Schelly (@neilschelly)
+Copyright 2013, Dyn, Inc (@DynInc)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

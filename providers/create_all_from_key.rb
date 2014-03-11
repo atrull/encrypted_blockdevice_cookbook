@@ -3,6 +3,7 @@
 # Provider:: create_all_from_key
 #
 # Copyright 2013 Alex Trull
+# Copyright 2013 Medidata Worldwide
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

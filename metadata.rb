@@ -1,8 +1,8 @@
 # 
 # Cookbook Name:: encrypted_blockdevice
 #
-# Copyright 2013, Alex Trull
-# Copyright 2013, Medidata Worldwide    
+# Copyright 2013, Neil Schelly
+# Copyright 2013, Dyn, Inc.    
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 #
 
 name             'encrypted_blockdevice'
-maintainer       'Medidata Worldwide'
-maintainer_email 'cookbooks@mdsol.com'
+maintainer       'Alex Trull'
+maintainer_email 'encrypted_blockdevice.cookbooks.alex@trull.org'
 license          'Apache v2.0'
 description      'A cookbook and LWRPs to manage block device encryption, offering many options for different scenarios.'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))

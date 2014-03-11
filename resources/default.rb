@@ -2,8 +2,8 @@
 # Cookbook Name:: encrypted_blockdevice
 # Resource:: default
 #
-# Copyright 2013, Alex Trull
-# Copyright 2013, Medidata Worldwide    
+# Copyright 2013, Neil Schelly
+# Copyright 2013, Dyn, Inc.    
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
