@@ -57,6 +57,9 @@ Requirements
 * The cryptsetup package, by one name or another.
 * Openssl for key generation.
 
+## Special Chef Permissions
+* knife acl add group clients containers data create,update
+
 We do not call the package manager directly, but use the chef 'package' abstraction. Attributes are provided to manage the package and service name if they differ.
 
 Main Attributes
