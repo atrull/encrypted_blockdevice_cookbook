@@ -196,13 +196,14 @@ def create_encrypted_blockdevice
         # The EncryptedDataBagItem object does not allow direct .save functionality because Opscode seem to think encrypted things ought to be readonly by machines.
         # So this is a workaround based upon their own test spec that demonstrates this behaviour. See Chef repo: spec/unit/knife/data_bag_create_spec.rb
         # Go complain at https://tickets.opscode.com/browse/CHEF-2401
-        # implemented closer to ./lib/chef/knife/data_bag_from_file.rb 
+        # implemented closer to ./lib/chef/knife/data_bag_from_file.rb
         puts "Encrypting device item for #{name}"
         encrypted_new_deviceitem = Chef::EncryptedDataBagItem.encrypt_data_bag_item(new_deviceitem, encrypted_data_bag_secret)
         deviceitem = Chef::DataBagItem.from_hash(encrypted_new_deviceitem)
       else
         deviceitem.raw_data = new_deviceitem
       end
+      deviceitem.create
       deviceitem.save
       puts "Saved #{keystore_item_name} to keystore #{keystore_databag_name}"
 
