@@ -196,7 +196,8 @@ def create_encrypted_blockdevice
         # Go complain at https://tickets.opscode.com/browse/CHEF-2401
         puts "Encrypting device item for #{name}"
         encrypted_new_deviceitem = Chef::EncryptedDataBagItem.encrypt_data_bag_item(new_deviceitem, encrypted_data_bag_secret)
-        deviceitem = Chef::DataBagItem.from_hash(encrypted_new_deviceitem)
+        #deviceitem = Chef::DataBagItem.from_hash(encrypted_new_deviceitem)
+        deviceitem.raw_data = encrypted_new_deviceitem
       else
         # Unencrypted databag item.
         deviceitem = Chef::DataBagItem.new
