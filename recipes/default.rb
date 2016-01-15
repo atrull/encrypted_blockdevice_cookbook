@@ -28,9 +28,10 @@ service "#{node[:encrypted_blockdevice][:cryptdisks_service]}" do
   action [ :enable, :start ]
 end
 
+# Disabling what should be default behaviour, for now
 # If we have contents at the default location, we try to make the encrypted_blockdevice with the LWRP.
-encrypted_blockdevice_create_all_from_key "encrypted_blockdevices" do
-  action :create
-  only_if node[:encrypted_blockdevices]
-end
+#encrypted_blockdevice_create_all_from_key "encrypted_blockdevices" do
+#  action :create
+#  only_if node[:encrypted_blockdevices]
+#end
 
