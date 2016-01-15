@@ -3,7 +3,7 @@
 # Provider:: default
 #
 # Copyright 2013, Neil Schelly
-# Copyright 2013, Dyn, Inc.    
+# Copyright 2013, Dyn, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ def load_current_resource
   if encrypted_blockdevice_exists?(@current_resource.name)
     @current_resource.exists = true
   end
-end    
+end
 
 #######################################################
 
@@ -72,7 +72,7 @@ def create_encrypted_blockdevice
   else
     # Otherwise we are dealing with a device.
     device = @new_resource.device
-  end 
+  end
 
   # Ordering matters, depending on the argument given. See the cryptsetup documentation for further information.
   if @new_resource.cryptsetup_args =~ /create/
@@ -85,15 +85,15 @@ def create_encrypted_blockdevice
 
   # discard (no keystore - just /dev/urandom)
   if ( @new_resource.keystore == "discard" )
- 
-    # We will read random bits from this for the key - the encrypted device will not survive reboot. 
+
+    # We will read random bits from this for the key - the encrypted device will not survive reboot.
     keyfile = "/dev/urandom"
-    
+
     # We call the cryptsetup command directly.
-    `cryptsetup #{cryptsetup_args} #{device_name_order} --cipher #{cipher} --batch-mode --key-file=#{keyfile}` 
+    `cryptsetup #{cryptsetup_args} #{device_name_order} --cipher #{cipher} --batch-mode --key-file=#{keyfile}`
     puts "Created #{name} and discarded the key"
     puts `cryptsetup status #{name}`
- 
+
   elsif ( @new_resource.keystore == "local" )
 
     # We are going with crypttab style entries for the local key storage.
@@ -122,7 +122,7 @@ def create_encrypted_blockdevice
       end
       notifies :run, "execute[cryptdisks_start]", :immediately
     end
-  
+
     # Provide service to notify, in order to reload crypttab
     execute "cryptdisks_start" do
       command "cryptdisks_start #{new_resource.name}"
@@ -130,11 +130,11 @@ def create_encrypted_blockdevice
     end
 
   elsif ( @new_resource.keystore == "encrypted_databag" || @new_resource.keystore == "databag" )
-    
+
     # We should only get here if we're doing databag keystorage.
-    
+
     # We will be using the cryptsetup command instead of the crypttab.
- 
+
     # The item's name is deterministicaly for each host this cookbook provider is run on: nodename.blocklabel and periods and slashes cleaned up.
     keystore_item_name = "#{node.name}-#{new_resource.name}".gsub(/\./, "-").gsub(/\//, "-")
 
@@ -157,13 +157,13 @@ def create_encrypted_blockdevice
     if ( keystore_item_result == nil || keystore_item_result.empty? )
 
       # This is probably the first run of this cookbook on this node with this configured device.
-      # So we set about creating a key, opening the device with the details we have and then saving the details to the keystore. 
-      
+      # So we set about creating a key, opening the device with the details we have and then saving the details to the keystore.
+
       # This is a new device - i.e. one for which we cannot find existing data, so we generate a new key.
       key = `openssl rand -hex #{@new_resource.keylength} | tr -d '\r\n'`
-     
+
       puts "Generating #{@new_resource.keylength} byte key for #{name}"
- 
+
       # We determine our 'keyfilesize' for --keyfile-size based on the 'keylength' in bytes doubled because the key is hex-encoded.
       keyfilesize = (new_resource.keylength * 2)
 
@@ -173,9 +173,9 @@ def create_encrypted_blockdevice
       `echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-`
 
       puts `cryptsetup status #{name}`
-       
+
       # We probably created the device, so we go on to create the bag item.
-      puts "Creating new device item for #{name}" 
+      puts "Creating new device item for #{name}"
 
       # We flesh out the databag of the used settings and key for the keystore - rather useful after a reboot.
       new_deviceitem = {
@@ -188,21 +188,21 @@ def create_encrypted_blockdevice
         "key" => key
       }
 
-      # Since we have two modes of databag storage, we have a minor divergence in behaviour - both save the settings/key to the keystore. 
+      deviceitem = Chef::DataBagItem.new
+      deviceitem.data_bag(keystore_databag_name)
+      # Since we have two modes of databag storage, we have a minor divergence in behaviour - both save the settings/key to the keystore.
       if @new_resource.keystore == "encrypted_databag"
         # Encrypted databag item.
         # The EncryptedDataBagItem object does not allow direct .save functionality because Opscode seem to think encrypted things ought to be readonly by machines.
         # So this is a workaround based upon their own test spec that demonstrates this behaviour. See Chef repo: spec/unit/knife/data_bag_create_spec.rb
         # Go complain at https://tickets.opscode.com/browse/CHEF-2401
+        # implemented closer to ./lib/chef/knife/data_bag_from_file.rb 
         puts "Encrypting device item for #{name}"
         encrypted_new_deviceitem = Chef::EncryptedDataBagItem.encrypt_data_bag_item(new_deviceitem, encrypted_data_bag_secret)
         deviceitem = Chef::DataBagItem.from_hash(encrypted_new_deviceitem)
       else
-        # Unencrypted databag item.
-        deviceitem = Chef::DataBagItem.new
         deviceitem.raw_data = new_deviceitem
-      end 
-      deviceitem.data_bag(keystore_databag_name)
+      end
       deviceitem.save
       puts "Saved #{keystore_item_name} to keystore #{keystore_databag_name}"
 
@@ -237,9 +237,9 @@ def create_encrypted_blockdevice
       puts `cryptsetup status #{name}`
 
     end
-     
+
   end
- 
+
 end
 
 def encrypted_blockdevice_crypttab_add(name, device, keyfile, cipher)
@@ -313,13 +313,13 @@ def delete_encrypted_blockdevice
     device "/dev/mapper/#{new_resource.name}"
     action [ :umount, :disable ]
   end
-  
+
   # deactivate encrypted filesystem
   execute "remove-encrypted_blockdevice" do
-    command "/sbin/cryptsetup remove #{new_resource.name}"       
-    action :run      
+    command "/sbin/cryptsetup remove #{new_resource.name}"
+    action :run
   end
-  
+
   # remove encrypted filesystem from crypttab
   ruby_block "delete_crypttab_#{new_resource.name}" do
     block do
@@ -329,11 +329,11 @@ def delete_encrypted_blockdevice
     end
   end
 
-  if @new_resource.file  
+  if @new_resource.file
     # delete file for loop block device
     file @new_resource.file do
       action :delete
-    end  
+    end
   end
 
 end
@@ -350,13 +350,13 @@ def encrypted_blockdevice_crypttab_exists?(name)
   if (! ::File.exists?( "/etc/crypttab" ))
     return false
   end
-  
+
   # Scan through crypttab
   ::File.foreach("/etc/crypttab") do |line|
     # Return true if we find a line beginning with #{name}
     return true if ( line =~ /^#{name} / )
   end
-  
+
   # Failed to find #{name} in crypttab
   return false
 end
@@ -373,10 +373,9 @@ def encrypted_blockdevice_crypttab_delete(name)
       Chef::Log.info("#{@new_resource} is removed from crypttab")
     end
   end
-  
+
   # Write out the contents array as lines in a new /etc/crypttab.
   ::File.open("/etc/crypttab", "w") do |crypttab|
     contents.reverse_each { |line| crypttab.puts line }
   end
 end
-
