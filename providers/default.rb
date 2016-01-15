@@ -188,6 +188,7 @@ def create_encrypted_blockdevice
         "key" => key
       }
 
+      deviceitem = Chef::DataBagItem.new
       # Since we have two modes of databag storage, we have a minor divergence in behaviour - both save the settings/key to the keystore.
       if @new_resource.keystore == "encrypted_databag"
         # Encrypted databag item.
@@ -200,7 +201,6 @@ def create_encrypted_blockdevice
         deviceitem.raw_data = encrypted_new_deviceitem
       else
         # Unencrypted databag item.
-        deviceitem = Chef::DataBagItem.new
         deviceitem.raw_data = new_deviceitem
       end
       deviceitem.data_bag(keystore_databag_name)
