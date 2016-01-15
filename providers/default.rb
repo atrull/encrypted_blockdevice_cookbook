@@ -203,7 +203,6 @@ def create_encrypted_blockdevice
       else
         deviceitem.raw_data = new_deviceitem
       end
-      deviceitem.create
       deviceitem.save
       puts "Saved #{keystore_item_name} to keystore #{keystore_databag_name}"
 
