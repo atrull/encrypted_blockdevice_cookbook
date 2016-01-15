@@ -144,7 +144,7 @@ Usage: Direct Resource/Provider
     include_recipe "filesystem"
 
     filesystem "cryptfs" do
-      fstype ext4
+      fstype "ext4"
       mount "/mnt/cryptfs"
       noenable true
     end
