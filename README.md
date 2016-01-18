@@ -15,7 +15,7 @@ There are four kinds of `keystore` available, giving differing levels of securit
 
 * `discard` Provides a one-time use block device with a randomly-generated key kept in RAM. Data will not be recoverable after reboot or cryptdisks shutdown/restart.
 
-* `encrypted_databag` Stores the key for the block device in an encrypted databag on the chef server. When the cookbook/chef runs after reboot, the block device will be decrypted and mounted.
+* `vault` Stores the key for the block device in a vault-encrypted databag on the chef server. When the cookbook/chef runs after reboot, the block device will be decrypted and mounted.
 
 * `databag` Stores the key for the block device in a normal databag on the chef server. When the cookbook/chef runs after reboot, the block device will be decrypted and mounted.
 
@@ -28,7 +28,7 @@ Keystore Caveats
 
 * In `discard` mode you must be absolutely sure you can lose the local copy of the data - backups are absolutely critical in this mode.
 
-* In `encrypted_databag` and `databag` mode we will use the Chef API as a keystore - this means the data should be recoverable once chef has run after a reboot, unless the key is delete from the chef server.
+* In `vault` and `databag` mode we will use the Chef API as a keystore - this means the data should be recoverable once chef has run after a reboot, unless the key is delete from the chef server.
 
 You should create the "encrypted_blockdevice_keystore" databag so that items can be put into it by this cookbook. This databag's name is set in the cookbook attributes and can be changed, but the items are named according to a pattern based upon the node name and device. Your node names must always be uniquely generated to avoid collisions/key sharing !
 
@@ -59,6 +59,7 @@ Requirements
 
 ## Special Chef Permissions
 * knife acl add group clients containers data create,update,delete
+* knife acl add client 'hostname1,hostname2' container clients read
 * knife group add client 'hostname1,hostname2' admins
 
 We do not call the package manager directly, but use the chef 'package' abstraction. Attributes are provided to manage the package and service name if they differ.
@@ -97,8 +98,10 @@ Path to the file-backed storage to be used for a loopback device. If the `file` 
 Keystore Options
 ================
 
-##### `keystore` discard|encrypted_databag|databag|local
+##### `keystore` discard|vault|databag|local
 Key store to use for creating the filesystem's key.
+##### `admins` johnny,sarah
+Chef admins of the vault keystore - only to be used with the vault keystore.. not databag.
 ##### `keyfile` /path/to/secret
 File location to use for creating the filesystem's key in `local` keystore mode.
 
@@ -163,7 +166,8 @@ Runlist: `encrypted_blockdevice`
   "encrypted_blockdevices": {
     "raidcrypt": {
       "device": "/dev/md0",
-      "keystore": "encrypted_databag"
+      "keystore": "vault",
+      "admins" : "alex"
     },
     "local": {
       "file": "/local.file",
@@ -193,7 +197,8 @@ Runlist: `encrypted_blockdevice, filesystem`
   "encrypted_blockdevices": {
     "raidcrypt": {
       "device": "/dev/md0",
-      "keystore": "encrypted_databag"
+      "keystore": "vault",
+      "admins" : "alex"
     }
   },
   "filesystems": {
