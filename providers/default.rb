@@ -184,13 +184,14 @@ def create_encrypted_blockdevice
       if @new_resource.keystore == "vault"
         # We call chef-vault methods.
 
+        vault_admins = @new_resource.admins
+
         puts "Encrypting device item for #{name}"
 
         chef_vault_secret "#{keystore_item_name}" do
           data_bag "#{keystore_databag_name}"
           raw_data(new_deviceitem)
-          #admins "#{@new_resource.admins}"
-          admins "atrull"
+          admins "#{vault_admins}"
           clients '*:*'
           search '*:*'
         end
