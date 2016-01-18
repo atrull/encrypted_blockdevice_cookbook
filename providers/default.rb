@@ -18,6 +18,11 @@
 # limitations under the License.
 #
 
+chef_gem 'chef-vault' do
+compile_time false
+end
+
+require 'chef-vault'
 
 def whyrun_supported?
   true
@@ -129,7 +134,7 @@ def create_encrypted_blockdevice
       action :nothing
     end
 
-  elsif ( @new_resource.keystore == "encrypted_databag" || @new_resource.keystore == "databag" )
+  elsif ( @new_resource.keystore == "vault" || @new_resource.keystore == "databag" )
 
     # We should only get here if we're doing databag keystorage.
 
@@ -188,23 +193,23 @@ def create_encrypted_blockdevice
         "key" => key
       }
 
-      deviceitem = Chef::DataBagItem.new
+
       # Since we have two modes of databag storage, we have a minor divergence in behaviour - both save the settings/key to the keystore.
-      if @new_resource.keystore == "encrypted_databag"
-        # Encrypted databag item.
-        # The EncryptedDataBagItem object does not allow direct .save functionality because Opscode seem to think encrypted things ought to be readonly by machines.
-        # So this is a workaround based upon their own test spec that demonstrates this behaviour. See Chef repo: spec/unit/knife/data_bag_create_spec.rb
-        # Go complain at https://tickets.opscode.com/browse/CHEF-2401
+      if @new_resource.keystore == "vault"
+        # We call chef-vault methods.
+
         puts "Encrypting device item for #{name}"
-        encrypted_new_deviceitem = Chef::EncryptedDataBagItem.encrypt_data_bag_item(new_deviceitem, encrypted_data_bag_secret)
-        #deviceitem = Chef::DataBagItem.from_hash(encrypted_new_deviceitem)
-        deviceitem.raw_data = encrypted_new_deviceitem
+
+        encrypted_deviceitem = ChefVault::Item.new(keystore_databag_name, keystore_item_name)
+        encrypted_deviceitem.raw_data = new_deviceitem
+        encrypted_deviceitem.save
       else
         # Unencrypted databag item.
+        deviceitem = Chef::DataBagItem.new
         deviceitem.raw_data = new_deviceitem
+        deviceitem.data_bag(keystore_databag_name)
+        deviceitem.save
       end
-      deviceitem.data_bag(keystore_databag_name)
-      deviceitem.save
       puts "Saved #{keystore_item_name} to keystore #{keystore_databag_name}"
 
     else
@@ -214,8 +219,8 @@ def create_encrypted_blockdevice
 
       puts "Getting data from #{keystore_databag_name} for #{keystore_item_name}"
       # We get our key from the bag
-      if @new_resource.keystore == "encrypted_databag"
-        existing_deviceitem = Chef::EncryptedDataBagItem.load(keystore_databag_name, keystore_item_name, encrypted_data_bag_secret)
+      if @new_resource.keystore == "vault"
+        existing_deviceitem = ChefVault::Item.load(keystore_databag_name, keystore_item_name)
         puts "Decrypted device item for #{name}"
       else
         existing_deviceitem = data_bag_item keystore_databag_name, keystore_item_name
