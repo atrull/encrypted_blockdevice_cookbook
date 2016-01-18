@@ -38,7 +38,7 @@ attribute :sparse, :kind_of => [ TrueClass, FalseClass ], :default => true
 # Keystore must be specified, keyfile is optional, only meaningful for 'local' keystore.
 attribute :keystore, :kind_of => String, :required => true
 # Admins should be specified if we are using the vault keystore
-attribute :admins, :kind_of => String, :required => false
+attribute :admins, :kind_of => String
 # Keyfile is used to indicate where the key is kept if the keystore is 'local'
 attribute :keyfile, :kind_of => String
 # Keylength is only used in local, databag and vault keystores.
