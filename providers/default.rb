@@ -18,10 +18,6 @@
 # limitations under the License.
 #
 
-chef_gem 'chef-vault' do
-compile_time false
-end
-
 require 'chef-vault'
 
 def whyrun_supported?
