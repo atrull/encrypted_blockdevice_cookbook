@@ -58,7 +58,8 @@ Requirements
 * Openssl for key generation.
 
 ## Special Chef Permissions
-* knife acl add group clients containers data create,update
+* knife acl add group clients containers data create,update,delete
+* knife group add client 'hostname1,hostname2' admins
 
 We do not call the package manager directly, but use the chef 'package' abstraction. Attributes are provided to manage the package and service name if they differ.
 
@@ -99,7 +100,7 @@ Keystore Options
 ##### `keystore` discard|encrypted_databag|databag|local
 Key store to use for creating the filesystem's key.
 ##### `keyfile` /path/to/secret
-File location to use for creating the filesystem's key in `local` keystore mode. 
+File location to use for creating the filesystem's key in `local` keystore mode.
 
 Encryption Options
 ==================
@@ -133,7 +134,7 @@ This represents an example of creating a few small encrypted filesystems, or usi
 
 Usage: Direct Resource/Provider
 ===============================
-    
+
     include_recipe "encrypted_blockdevice"
 
     encrypted_blockdevice "cryptfs" do
