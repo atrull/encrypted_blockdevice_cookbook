@@ -212,7 +212,7 @@ def create_encrypted_blockdevice
       puts "Getting data from #{keystore_databag_name} for #{keystore_item_name}"
       # We get our key from the bag
       if @new_resource.keystore == "vault"
-        existing_deviceitem = ChefVault::Item.load(keystore_databag_name, keystore_item_name)
+        existing_deviceitem = chef_vault_item(keystore_databag_name, keystore_item_name)
         puts "Decrypted device item for #{name}"
       else
         existing_deviceitem = data_bag_item keystore_databag_name, keystore_item_name
