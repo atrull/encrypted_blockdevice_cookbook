@@ -189,6 +189,7 @@ def create_encrypted_blockdevice
           data_bag "#{keystore_databag_name}"
           raw_data(new_deviceitem)
           clients "#{node.name}"
+          admins "#{node.name}"
           search '*:*'
         end
 
