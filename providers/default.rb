@@ -185,10 +185,12 @@ def create_encrypted_blockdevice
         # We call chef-vault methods.
 
         puts "Encrypting device item for #{name}"
+
         chef_vault_secret "#{keystore_item_name}" do
           data_bag "#{keystore_databag_name}"
           raw_data(new_deviceitem)
-          admins "#{@new_resource.admins}"
+          #admins "#{@new_resource.admins}"
+          admins "atrull"
           clients '*:*'
           search '*:*'
         end

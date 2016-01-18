@@ -23,7 +23,7 @@ maintainer_email 'encrypted_blockdevice.cookbooks.alex@trull.org'
 license          'Apache v2.0'
 description      'A cookbook and LWRPs to manage block device encryption, offering many options for different scenarios.'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '0.0.19'
+version          '0.0.20'
 
 %w/redhat centos xenserver ubuntu debian scientific amazon/.each do |os|
   supports os
