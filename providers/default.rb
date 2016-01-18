@@ -188,8 +188,7 @@ def create_encrypted_blockdevice
         chef_vault_secret "#{keystore_item_name}" do
           data_bag "#{keystore_databag_name}"
           raw_data(new_deviceitem)
-          clients "#{node.name}"
-          admins "#{node.name}"
+          clients '*:*'
           search '*:*'
         end
 
