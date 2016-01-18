@@ -28,6 +28,9 @@ service "#{node[:encrypted_blockdevice][:cryptdisks_service]}" do
   action [ :enable, :start ]
 end
 
+# We are using chef-vault for some functionality including encryption.
+include_recipe 'chef-vault'
+
 # Disabling what should be default behaviour, for now
 # If we have contents at the default location, we try to make the encrypted_blockdevice with the LWRP.
 #encrypted_blockdevice_create_all_from_key "encrypted_blockdevices" do
