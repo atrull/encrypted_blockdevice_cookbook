@@ -18,8 +18,6 @@
 # limitations under the License.
 #
 
-require 'chef-vault'
-
 def whyrun_supported?
   true
 end
