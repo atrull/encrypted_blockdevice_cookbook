@@ -41,7 +41,7 @@ attribute :keystore, :kind_of => String, :required => true
 attribute :admins, :kind_of => String, :required => false
 # Keyfile is used to indicate where the key is kept if the keystore is 'local'
 attribute :keyfile, :kind_of => String
-# Keylength is only used in local, databag and encrypted_databag keystores.
+# Keylength is only used in local, databag and vault keystores.
 attribute :keylength, :kind_of => Fixnum, :default => 1024
 
 # Additional arguments, "create" by default, might be needed for edgecases just like yours.

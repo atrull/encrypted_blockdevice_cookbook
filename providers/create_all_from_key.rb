@@ -22,7 +22,7 @@ action :create do
 
   # Our key is the new resource name or if not provided, not we go with "encrypted_blockdevices"
   key = @new_resource.name || "encrypted_blockdevices"
-  
+
   # We get our encrypted_blockdevice from the key in node data
   encrypted_blockdevices_to_be_created = node[key]
 
@@ -40,13 +40,14 @@ action :create do
       size eb["size"] if eb["size"]
       sparse eb["sparse"] if eb["sparse"]
       keystore eb["keystore"] if eb["keystore"]
+      admins eb["admins"] if eb["admins"]
       keyfile eb["keyfile"] if eb["keyfile"]
       keylength eb["keylength"] if eb["keylength"]
       cryptsetup_args eb["cryptsetup_args"] if eb["cryptsetup_args"]
       action [:create]
 
     end
-  
+
   end
 
   new_resource.updated_by_last_action(true)

@@ -2,7 +2,8 @@
     "encrypted_blockdevices": {
         "raidcrypt": {
             "device": "/dev/md0",
-            "keystore": "encrypted_databag",
+            "keystore": "vault",
+            "admins": "johnny",
             "keylength": 1024
         },
         "plainbag": {

@@ -1,9 +1,9 @@
-# 
+#
 # Cookbook Name:: encrypted_blockdevice
 # Recipe:: example
 #
 # Copyright 2013, Neil Schelly
-# Copyright 2013, Dyn, Inc.    
+# Copyright 2013, Dyn, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,  
+# distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
@@ -59,12 +59,12 @@ end
 
 # And a filesystem to go on top.
 filesystem "datacrypt" do
-  fstype ext4 
+  fstype ext4
   mount "/datacrypt"
 end
 
 # A device gets encrypted, using a key stored local to the machine, not that secure, but whatever floats your boat. Maybe your local disk or secrets folder is on a disk you know is watched over by an armed guard, with another armed guard to watch that armed guard ?
-# Keys kept next to secrets means secrets are lost with ease. 
+# Keys kept next to secrets means secrets are lost with ease.
 encrypted_blockdevice "data2" do
   device "/dev/xvdd"
   keystore local
@@ -81,7 +81,8 @@ end
 # A local raid device gets labelled "data3" - we store the key in a databag in the chef API. Maybe you trust the chef API to be your keystore ? Maybe. The device is only good if the key is recoverable, so deleting the key from the keystore denies attackers if they haven't comprimised the running machine.
 encrypted_blockdevice "data3" do
   device "/dev/md0"
-  keystore encrypted_databag
+  keystore vault
+  admins bob,janet
   keylength 4096
 end
 
@@ -95,4 +96,3 @@ filesystem "data3" do
   fstype xfs
   mount "/data3"
 end
-
