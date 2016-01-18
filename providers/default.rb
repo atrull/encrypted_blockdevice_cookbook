@@ -144,14 +144,6 @@ def create_encrypted_blockdevice
     # We search for the items we expect in the bag we configured - just referencing them can cause a failure - 404 not found etc.
     keystore_item_result = search(:"#{keystore_databag_name}", "id:#{keystore_item_name}" )
 
-    # We pull the secret from the file's default location. If someone can prove a better way to get this config bit, maybe from Chef::Config, please submit a PR/patch/code snippet !
-    if ::File.exists?(node[:encrypted_blockdevice][:encrypted_data_bag_secret])
-      puts "We found a secret at #{node[:encrypted_blockdevice][:encrypted_data_bag_secret]}"
-      encrypted_data_bag_secret = `cat #{node[:encrypted_blockdevice][:encrypted_data_bag_secret]}`.strip
-    else
-      puts "No key found at #{node[:encrypted_blockdevice][:encrypted_data_bag_secret]}"
-    end
-
     # If we can't find the item for the device we're creating, the results should be empty or nil.
     if ( keystore_item_result == nil || keystore_item_result.empty? )
 
@@ -193,10 +185,16 @@ def create_encrypted_blockdevice
         # We call chef-vault methods.
 
         puts "Encrypting device item for #{name}"
+        chef_vault_secret "#{keystore_item_name}" do
+          data_bag "#{keystore_databag_name}"
+          raw_data(new_deviceitem)
+          clients "#{node.name}"
+          search '*:*'
+        end
 
-        encrypted_deviceitem = ChefVault::Item.new(keystore_databag_name, keystore_item_name)
-        encrypted_deviceitem.raw_data = new_deviceitem
-        encrypted_deviceitem.save
+      #  deviceitem = ChefVault::Item.new(keystore_databag_name, keystore_item_name)
+      #  deviceitem.raw_data = new_deviceitem
+      #  deviceitem.save
       else
         # Unencrypted databag item.
         deviceitem = Chef::DataBagItem.new
