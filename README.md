@@ -50,8 +50,9 @@ Requirements
 
 ## Platform
 
-* Ubuntu 12.04
-* Probably other recent distros.
+* Ubuntu 12.04 (original dev target in 2013)
+* Ubuntu 14.04 (dev target in 2016)
+* Probably other recent distros with the same tools.
 
 ## Packages
 * The cryptsetup package, by one name or another.
