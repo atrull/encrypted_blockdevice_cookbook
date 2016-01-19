@@ -79,9 +79,6 @@ Cookbook Attributes:
 ##### `node[:encrypted_blockdevice][:keystore_databag_name]` = "encrypted_blockdevice_keystore"
 The name of the encrypted blockdevice keystore to use, if the keystore is of the databag type.
 
-##### `node[:encrypted_blockdevice][:encrypted_data_bag_secret]` = "/etc/chef/encrypted_data_bag_secret"
-The encrypted databag secret key.
-
 ##### `node[:encrypted_blockdevice][:cryptsetup_package]` = "cryptsetup"
 ##### `node[:encrypted_blockdevice][:cryptdisks_service]` = "cryptdisks"
 The following attributes are good for debian and ubuntu - they are provided for extension to other distros.
