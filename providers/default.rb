@@ -158,16 +158,6 @@ def create_encrypted_blockdevice
       # We determine our 'keyfilesize' for --keyfile-size based on the 'keylength' in bytes doubled because the key is hex-encoded.
       keyfilesize = (new_resource.keylength * 2)
 
-      # We pass the key without a newline to the cryptsetup command with the necessary arguments.
-      # We should find a way to pipe this in without it showing it in ps auxww or any logs.
-
-      `echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-`
-
-      puts `cryptsetup status #{name}`
-
-      # We probably created the device, so we go on to create the bag item.
-      puts "Creating new device item for #{name}"
-
       # We flesh out the databag of the used settings and key for the keystore - rather useful after a reboot.
       new_deviceitem = {
         "id" => keystore_item_name,
@@ -178,7 +168,6 @@ def create_encrypted_blockdevice
         "cipher" => cipher,
         "key" => key
       }
-
 
       # Since we have two modes of databag storage, we have a minor divergence in behaviour - both save the settings/key to the keystore.
       if @new_resource.keystore == "vault"
@@ -196,9 +185,6 @@ def create_encrypted_blockdevice
           search '*:*'
         end
 
-      #  deviceitem = ChefVault::Item.new(keystore_databag_name, keystore_item_name)
-      #  deviceitem.raw_data = new_deviceitem
-      #  deviceitem.save
       else
         # Unencrypted databag item.
         deviceitem = Chef::DataBagItem.new
@@ -206,7 +192,20 @@ def create_encrypted_blockdevice
         deviceitem.data_bag(keystore_databag_name)
         deviceitem.save
       end
+
       puts "Saved #{keystore_item_name} to keystore #{keystore_databag_name}"
+
+      # We pass the key without a newline to the cryptsetup command with the necessary arguments.
+      # We should find a way to pipe this in without it showing it in ps auxww or any logs.
+
+      `echo -n #{key} | cryptsetup #{cryptsetup_args} #{device_name_order} --keyfile-size #{keyfilesize} --cipher #{cipher} --batch-mode --key-file=-`
+
+      # Cryptsetup Status
+      puts `cryptsetup status #{name}`
+
+      # We probably created the device, so we go on to create the bag item.
+      puts "created new device #{name}"
+
 
     else
 

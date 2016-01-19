@@ -57,7 +57,7 @@ Requirements
 * The cryptsetup package, by one name or another.
 * Openssl for key generation.
 
-## Special Chef Permissions
+## Special Chef Permissions (to get past the 403 permission denied on databag upload)
 * knife acl add group clients containers data create,update,delete
 * knife acl add client 'hostname1,hostname2' container clients read
 * knife group add client 'hostname1,hostname2' admins
