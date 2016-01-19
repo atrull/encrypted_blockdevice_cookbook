@@ -213,14 +213,16 @@ Links
 =====
 
 * Cookbook Development
-https://github.com/atrullmdsol/encrypted_blockdevice_cookbook
+https://github.com/atrull/encrypted_blockdevice_cookbook
 
 * Cryptsetup Development
 http://code.google.com/p/cryptsetup/
 
 License and Authors
 ===================
-Author: Neil Schelly (@neilschelly)
+Author - Databag and Vault pieces and current mainainer:
+Alex Trull (@AlexanderTrull) partly on behalf of Medidata Solutions.
+Original Author/Sponsor: Neil Schelly (@neilschelly)
 Copyright 2013, Dyn, Inc (@DynInc)
 
 Licensed under the Apache License, Version 2.0 (the "License");
