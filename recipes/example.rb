@@ -23,9 +23,18 @@ package "#{node[:encrypted_blockdevice][:cryptsetup_package]}" do
   action [ :install, :upgrade ]
 end
 
-# Ensure service is enabled and started.
-service "#{node[:encrypted_blockdevice][:cryptdisks_service]}" do
-  action [ :enable, :start ]
+case node['platform_family']
+when 'debian'
+
+  # Ensure service is enabled and started.
+  service "#{node[:encrypted_blockdevice][:cryptdisks_service]}" do
+    action [ :enable, :start ]
+  end
+
+when 'rhel'
+
+  # no init script on this platform
+
 end
 
 # We are using chef-vault for some default behaviour.
