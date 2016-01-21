@@ -52,7 +52,7 @@ Requirements
 
 * Ubuntu 12.04 (original dev target in 2013)
 * Ubuntu 14.04 (dev target in 2016)
-* Probably other recent distros with the same tools.
+* Probably other recent distros with the same tools (rhel releases have been partly tested).
 
 ## Packages
 * The cryptsetup package, by one name or another.
