@@ -1,5 +1,5 @@
 # 
-# Cookbook Name:: encryptfs
+# Cookbook Name:: encrypted_blockdevice
 # Attributes:: default
 #
 # Copyright 2013, Neil Schelly
@@ -18,11 +18,14 @@
 # limitations under the License.
 #
 
-# If the last encryptfs is removed, setting this true will uninstall cryptsetup
-default[:encryptfs][:uninstall_cryptsetup_iflast] = false
+# The [:encrypted_blockdevices] key is used to create the encrypted block devices themselves from attributes, see examples in the README. We recalculate the hash each run.
+default[:encrypted_blockdevices] = Hash.new
 
-# Path to the cryptdisks_start and cryptdisks_stop files
-default[:encryptfs][:cryptdisks_path] = "/sbin" unless node.platform?("ubuntu")
-default[:encryptfs][:cryptdisks_path] = "/usr/sbin" if node.platform?("ubuntu")
-default[:encryptfs][:cryptdisks_start] = "#{node[:encryptfs][:cryptdisks_path]}/cryptdisks_start"
-default[:encryptfs][:cryptdisks_stop] = "#{node[:encryptfs][:cryptdisks_path]}/cryptdisks_stop"
+# The [:encrypted_blockdevice] key is used for settings - don't confuse this with the one above.
+
+# The default keystore's name
+default[:encrypted_blockdevice][:keystore_databag_name] = "encrypted_blockdevice_keystore"
+
+# The following attributes are good for debian and ubuntu - they are provided for extension to other distros.
+default[:encrypted_blockdevice][:cryptsetup_package] = "cryptsetup"
+default[:encrypted_blockdevice][:cryptdisks_service] = "cryptdisks"

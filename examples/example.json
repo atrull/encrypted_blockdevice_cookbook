@@ -1,0 +1,48 @@
+{
+    "encrypted_blockdevices": {
+        "raidcrypt": {
+            "device": "/dev/md0",
+            "keystore": "vault",
+            "admins": "johnny",
+            "keylength": 1024
+        },
+        "plainbag": {
+            "file": "/test/plainbag.file",
+            "keystore": "databag",
+            "size": 100
+        },
+        "local": {
+             "file": "/test/local.file",
+            "keystore": "local",
+            "keyfile": "/etc/secrets/local.key",
+            "sparse": false,
+            "size": 1000
+        },
+        "discard": {
+            "file": "/test/discard.file",
+            "keystore": "discard",
+            "size": 1000
+        }
+    },
+    "filesystems": {
+        "raidcrypt": {
+            "fstype": "ext4",
+            "mount": "/mnt",
+            "noenable": true
+        },
+        "plainbag": {
+            "fstype": "ext2",
+            "mount": "/test/plainbag",
+            "noenable": true
+        },
+        "local": {
+            "fstype": "xfs",
+            "mount": "/test/local"
+        },
+        "discard": {
+            "fstype": "ext3",
+            "mount": "/test/discard",
+            "noenable": true
+        }
+    }
+}

@@ -1,4 +1,15 @@
-.DS_Store
+.vagrant
+Berksfile.lock
 *~
-*.swp
-DEADJOE
+*#
+.#*
+\#*#
+.*.sw[a-z]
+*.un~
+/cookbooks
+
+# Bundler
+Gemfile.lock
+bin/*
+.bundle/*
+
