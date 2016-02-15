@@ -158,6 +158,8 @@ def create_encrypted_blockdevice
       # We determine our 'keyfilesize' for --keyfile-size based on the 'keylength' in bytes doubled because the key is hex-encoded.
       keyfilesize = (new_resource.keylength * 2)
 
+      puts "Generating json object for #{name} item"
+
       # We flesh out the databag of the used settings and key for the keystore - rather useful after a reboot.
       new_deviceitem = {
         "id" => keystore_item_name,
@@ -175,7 +177,7 @@ def create_encrypted_blockdevice
 
         vault_admins = @new_resource.admins
 
-        puts "Encrypting device item for #{name}"
+        puts "Encrypting device vault item for #{name}"
 
         chef_vault_secret "#{keystore_item_name}" do
           data_bag "#{keystore_databag_name}"
@@ -187,9 +189,11 @@ def create_encrypted_blockdevice
 
       else
         # Unencrypted databag item.
+        puts "Generating databag object for #{name} item"
         deviceitem = Chef::DataBagItem.new
         deviceitem.raw_data = new_deviceitem
         deviceitem.data_bag(keystore_databag_name)
+        puts "Saving databag item for #{name} item"
         deviceitem.save
       end
 
