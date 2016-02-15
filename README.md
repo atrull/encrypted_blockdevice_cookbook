@@ -62,6 +62,7 @@ Requirements
 * knife acl add group clients containers data create,update,delete
 * knife acl add client 'hostname1,hostname2' container clients read
 * knife group add client 'hostname1,hostname2' admins
+* if 403s persist, recreate the databag, since these settings only work on databags created after the settings are added
 
 We do not call the package manager directly, but use the chef 'package' abstraction. Attributes are provided to manage the package and service name if they differ.
 
