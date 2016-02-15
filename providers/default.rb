@@ -191,8 +191,8 @@ def create_encrypted_blockdevice
         # Unencrypted databag item.
         puts "Generating databag object for #{name} item"
         deviceitem = Chef::DataBagItem.new
-        deviceitem.raw_data = new_deviceitem
         deviceitem.data_bag(keystore_databag_name)
+        deviceitem.raw_data = new_deviceitem
         puts "Saving databag item for #{name} item"
         deviceitem.save
       end
